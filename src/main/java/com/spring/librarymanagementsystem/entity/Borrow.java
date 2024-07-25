@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BorrowingRecord {
+public class Borrow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

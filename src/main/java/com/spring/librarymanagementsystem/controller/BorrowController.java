@@ -1,30 +1,30 @@
 package com.spring.librarymanagementsystem.controller;
 
-import com.spring.librarymanagementsystem.service.BorrowService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.spring.librarymanagementsystem.dto.BorrowDto;
+import com.spring.librarymanagementsystem.service.service.BorrowService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/")
+@RequestMapping("api/borrows")
+@RequiredArgsConstructor
+@Validated
 public class BorrowController {
 
-    private BorrowService borrowService;
+    private final BorrowService borrowService;
 
-    @Autowired
-    public BorrowController(BorrowService borrowService) {
-        this.borrowService = borrowService;
+    @PostMapping
+    public ResponseEntity<Void> addBorrow(@RequestBody @Valid BorrowDto borrowDto) {
+        borrowService.borrowBook(borrowDto);
+        return ResponseEntity.ok().build();
     }
 
-    @PostMapping("borrow/{bookId}/patron/{patronId}")
-    public ResponseEntity<String> borrow(@PathVariable long bookId, @PathVariable long patronId) {
-        borrowService.borrowBook(bookId,patronId);
-        return ResponseEntity.ok("Borrowed successfully");
-    }
-
-    @PutMapping("return/{bookId}/patron/{patronId}")
-    public ResponseEntity<String> returnBook(@PathVariable long bookId, @PathVariable long patronId) {
-        borrowService.returnBook(bookId,patronId);
-        return ResponseEntity.ok("Returned successfully");
+    @PostMapping("/return/{bookId}/{patronId}")
+    public ResponseEntity<Void> returnBorrow(@PathVariable long bookId, @PathVariable long patronId) {
+        borrowService.returnBook(bookId, patronId);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,52 +1,53 @@
 package com.spring.librarymanagementsystem.controller;
 
-import com.spring.librarymanagementsystem.entity.Book;
-import com.spring.librarymanagementsystem.service.BookService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.spring.librarymanagementsystem.dto.BookDto;
+import com.spring.librarymanagementsystem.service.service.BookService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/")
+@RequestMapping("api/books")
+@RequiredArgsConstructor
+@Validated
 public class BookController {
 
+    private final BookService bookService;
 
-    private BookService bookService;
-
-    @Autowired
-    public BookController(BookService bookService) {
-        this.bookService = bookService;
+    @GetMapping
+    public ResponseEntity<List<BookDto>> getAllBooks() {
+        List<BookDto> bookDtoList = bookService.getAllBooks();
+        return ResponseEntity.ok(bookDtoList);
     }
 
-    @GetMapping("books")
-    public ResponseEntity<List <Book>> getBooks() {
-        return  bookService.findAll();
+    @GetMapping("/{id}")
+    public ResponseEntity<BookDto> getBookById(@PathVariable long id) {
+        return bookService.getBookById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("books/{id}")
-    public ResponseEntity<Book> getBookById(@PathVariable int id) {
-        return bookService.findById(id);
+    @PostMapping
+    public ResponseEntity<Void> createBook(@RequestBody @Valid BookDto bookDto) {
+        bookService.saveBook(bookDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PostMapping("books")
-    public ResponseEntity<String> addBook(@RequestBody Book book) {
-        bookService.save(book);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Book added successfully");
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateBook(@PathVariable long id, @RequestBody @Valid BookDto bookDto) {
+        bookDto.setId(id);
+        bookService.updateBook(bookDto);
+        return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("books/{id}")
-    public ResponseEntity<String> updateBook(@PathVariable long id, @RequestBody Book book) {
-        bookService.update(id,book);
-        return ResponseEntity.ok("Book updated successfully");
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBook(@PathVariable long id) {
+        bookService.deleteBook(id);
+        return ResponseEntity.noContent().build();
     }
-
-    @DeleteMapping("books/{id}")
-    public ResponseEntity<String> deleteBook(@PathVariable long id) {
-        bookService.deleteById(id);
-        return ResponseEntity.ok("Book deleted successfully");
-    }
-
 }

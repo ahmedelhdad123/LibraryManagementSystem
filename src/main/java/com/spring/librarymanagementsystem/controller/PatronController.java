@@ -1,55 +1,52 @@
 package com.spring.librarymanagementsystem.controller;
 
-import com.spring.librarymanagementsystem.entity.Patron;
-import com.spring.librarymanagementsystem.service.PatronService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.spring.librarymanagementsystem.dto.PatronDto;
+import com.spring.librarymanagementsystem.service.service.PatronService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/")
+@RequestMapping("api/patrons")
+@RequiredArgsConstructor
+@Validated
 public class PatronController {
 
-    private PatronService patronService;
+    private final PatronService patronService;
 
-    @Autowired
-    public PatronController(PatronService patronService) {
-        this.patronService = patronService;
+    @GetMapping
+    public ResponseEntity<List<PatronDto>> getAllPatrons() {
+        return ResponseEntity.ok(patronService.getAllPatrons());
     }
 
-    @GetMapping("patrons")
-    public ResponseEntity<List<Patron>> getPatrons() {
-        return ResponseEntity.ok(patronService.findAll().getBody());
+    @GetMapping("/{id}")
+    public ResponseEntity<PatronDto> getPatronById(@PathVariable long id) {
+        return patronService.getPatronById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("patrons/{id}")
-    public ResponseEntity<Patron> getPatronById(@PathVariable long id) {
-        Patron patron = patronService.findById(id).getBody();
-        if (patron != null) {
-            return ResponseEntity.ok(patron);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @PostMapping
+    public ResponseEntity<Void> createPatron(@RequestBody @Valid PatronDto patronDto) {
+        patronService.savePatron(patronDto);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PostMapping("patrons")
-    public ResponseEntity<String> createPatron(@RequestBody Patron patron) {
-        patronService.save(patron);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Patron created");
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updatePatron(@PathVariable long id, @RequestBody @Valid PatronDto patronDto) {
+        patronDto.setId(id);
+        patronService.updatePatron(patronDto);
+        return ResponseEntity.ok().build();
     }
 
-    @PutMapping("patrons/{id}")
-    public ResponseEntity<String> updatePatron(@PathVariable long id, @RequestBody Patron patron) {
-        patronService.update(id,patron);
-        return ResponseEntity.ok("Patron updated");
-    }
-
-    @DeleteMapping("patrons/{id}")
-    public ResponseEntity<String> deletePatron(@PathVariable long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePatron(@PathVariable long id) {
         patronService.deletePatron(id);
-        return ResponseEntity.ok("Patron deleted");
+        return ResponseEntity.noContent().build();
     }
 }
