@@ -1,6 +1,7 @@
 package com.spring.librarymanagementsystem.dto;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,4 +28,7 @@ public class BookDto {
 
     @NotEmpty(message = "ISBN cannot be empty")
     private String isbn;
+
+    @PositiveOrZero(message = "Quantity must be a positive number")
+    private long quantity;
 }

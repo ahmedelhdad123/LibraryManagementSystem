@@ -5,15 +5,14 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Book {
@@ -40,31 +39,17 @@ public class Book {
     private String isbn;
 
     @Column
-    private boolean isAvailable;
+    private long quantity;
 
     @JsonIgnore
     @OneToMany(mappedBy = "book", cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.LAZY)
     private List<Borrow> borrows = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "patron_id")
-    private Patron patron;
-
-    public boolean canBeBorrowed() {
-        return this.isAvailable;
+    public void decreaseQuantity() {
+        this.quantity--;
     }
 
-
-    public void markAsBorrowed() {
-        if (!canBeBorrowed()) {
-            throw new IllegalStateException("Book cannot be borrowed because it is not available.");
-        }
-        this.isAvailable = false;
+    public void increaseQuantity() {
+        this.quantity++;
     }
-
-    public void markAsReturned() {
-        this.isAvailable = true;
-    }
-
-
 }

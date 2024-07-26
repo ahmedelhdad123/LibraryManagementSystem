@@ -43,7 +43,6 @@ public class BookServiceImpl implements BookService {
         return bookRepo.findById(id)
                 .map(bookMapper::toDto)
                 .or(() -> {
-                    logger.error("Book not found with ID: {}", id);
                     throw new ResourceNotFound("Book not found with ID: " + id);
                 });
     }
@@ -60,16 +59,14 @@ public class BookServiceImpl implements BookService {
     @CacheEvict(value = "books", key = "#bookDto.id",allEntries = true)
     public void updateBook(BookDto bookDto) {
         Book existingBook = bookRepo.findById(bookDto.getId())
-                .orElseThrow(() -> {
-                    logger.error("Book not found with ID: {}", bookDto.getId());
-                    return new ResourceNotFound("Book not found with ID " + bookDto.getId());
-                });
+                .orElseThrow(() -> new ResourceNotFound("Book not found with ID " + bookDto.getId()));
 
         existingBook.setTitle(bookDto.getTitle());
         existingBook.setAuthor(bookDto.getAuthor());
         existingBook.setPublicationYear(bookDto.getPublicationYear());
         existingBook.setDescription(bookDto.getDescription());
         existingBook.setIsbn(bookDto.getIsbn());
+        existingBook.setQuantity(bookDto.getQuantity());
 
         logger.info("Updating book with ID: {}", bookDto.getId());
         bookRepo.save(existingBook);
@@ -81,7 +78,6 @@ public class BookServiceImpl implements BookService {
     public void deleteBook(long id) {
         logger.info("Deleting book with ID: {}", id);
         if (!bookRepo.existsById(id)) {
-            logger.error("Book not found with ID: {}", id);
             throw new ResourceNotFound("Book not found with ID " + id);
         }
         bookRepo.deleteById(id);

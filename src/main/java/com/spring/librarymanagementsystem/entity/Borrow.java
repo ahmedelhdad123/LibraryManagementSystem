@@ -1,14 +1,15 @@
 package com.spring.librarymanagementsystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
-@Data
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Borrow {
@@ -20,13 +21,13 @@ public class Borrow {
     private LocalDate borrowDate;
     private LocalDate returnDate;
 
-    @ManyToOne
-    @JoinColumn(name = "patron_id")
-    private Patron patron;
-
-    @ManyToOne
-    @JoinColumn(name = "book_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id", nullable = false)
+    @JsonBackReference
     private Book book;
 
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patron_id", nullable = false)
+    @JsonBackReference
+    private Patron patron;
 }

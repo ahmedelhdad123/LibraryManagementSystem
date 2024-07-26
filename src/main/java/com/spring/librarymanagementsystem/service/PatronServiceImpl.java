@@ -44,7 +44,6 @@ public class PatronServiceImpl implements PatronService {
         return patronRepo.findById(id)
                 .map(patronMapper::toDto)
                 .or(() -> {
-                    logger.error("Patron not found with ID: {}", id);
                     throw new ResourceNotFound("Patron not found with ID: " + id);
                 });
     }
@@ -61,10 +60,7 @@ public class PatronServiceImpl implements PatronService {
     @CacheEvict(value = "patrons", key = "#patronDto.id",allEntries = true)
     public void updatePatron(PatronDto patronDto) {
         Patron existingPatron = patronRepo.findById(patronDto.getId())
-                .orElseThrow(() -> {
-                    logger.error("Patron not found with ID: {}", patronDto.getId());
-                    return new ResourceNotFound("Patron not found with ID: " + patronDto.getId());
-                });
+                .orElseThrow(() -> new ResourceNotFound("Patron not found with ID: " + patronDto.getId()));
 
         existingPatron.setName(patronDto.getName());
         existingPatron.setEmail(patronDto.getEmail());
@@ -80,7 +76,6 @@ public class PatronServiceImpl implements PatronService {
     public void deletePatron(long id) {
         logger.info("Deleting patron with ID: {}", id);
         if (!patronRepo.existsById(id)) {
-            logger.error("Patron not found with ID: {}", id);
             throw new ResourceNotFound("Patron not found with ID: " + id);
         }
         patronRepo.deleteById(id);
